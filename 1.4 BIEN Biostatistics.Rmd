@@ -42,8 +42,8 @@ plot(breadfruit_rangemap, col="green", add=T)
 
 ```{r}
 # Map the range of breadfruit + occurence records
-map('world', fill=T, col="grey", bg="light blue", xlim=c(-180,-20), ylim=c(-60, 80))
-plot(breadfruit_rangemap, col="green", add=T)
+map('world', fill=T, col="white", bg="light blue", xlim=c(-180,-20), ylim=c(-60, 80))
+plot(breadfruit_rangemap, col="purple", add=T)
 points(cbind(Artocarpus_altilis$longitude, Artocarpus_altilis$latitude), col="blue", pch=20, cex=1)
 ```
 
@@ -56,15 +56,18 @@ By default, RBIEN commands for species occurrence only downloads limited informa
 ```{r}
 Artocarpus_altilis_full <- BIEN_occurrence_species(species = "Artocarpus altilis",cultivated = T,only.new.world = F,all.taxonomy = T,native.status = T,observation.type = T,political.boundaries = T)
 
+#CHECK ON THIS - run together
+
 str(Artocarpus_altilis_full)
 ```
+
 
 This was a slightly slower process because so much more data were obtained. 
 
 Now let's map again, but on the world map instead of just the Americas. And let's show points from the full query in red, and overlay points from the default query (more limited) in blue. 
 
 ```{r}
-map('world', fill=T , col="grey", bg="light blue")
+map('world', fill=T , col="white", bg="light blue")
 
 #Plot the points from the full query in red
 points(cbind(Artocarpus_altilis_full$longitude, Artocarpus_altilis_full$latitude), col="red", pch=20, cex=1)
@@ -77,6 +80,9 @@ points(cbind(Artocarpus_altilis$longitude, Artocarpus_altilis$latitude), col="bl
 
 ```{r}
 BIEN_trait_list()
+
+#RUN TO SEE WHAT TYPES OF TRAITS YOU CAN GET! but it wouldn't run in class, so this is weird
+
 ```
 
 ```{r}
@@ -169,8 +175,9 @@ class(DBHa)
 
 
 ```{r}
-boxplot(DBHn)
-hist(DBHn)
+boxplot(DBH)
+hist(DBH)
+#can do a too
 ```
 
 

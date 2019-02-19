@@ -28,7 +28,11 @@ Now, open RStudio. You can open a version of this notebook in RStudio and follow
 ```{r}
 install.packages("BIEN") # Comment out this command with a # once you have BIEN installed.
 # Then of course you need to open the package from your library of installed packages. Simultaneously, it's smart to open some other packages that may already be installed, which is done below with the library command.
+
+
+
 ```
+
 
 ```{r}
 library(BIEN)
@@ -43,12 +47,14 @@ vignette("BIEN")
 Hierochloe_odorata <- BIEN_occurrence_species(species = "Hierochloe odorata")
 ```
 
-It looks like nothing happened, but you actually have created a dataframe called Hierochloe_odorata, full of character data and numeric data. Use the commands below. The first allows you to view the so called meta-data (data about the data). The second command looks at the first five entries in the data.
+It looks like nothing happened, but you actually have created a dataframe called Hierochloe_odorata, full of character data and numeric data. Use the commands below. The first allows you to view the so called meta-data (data about the data). The second command looks at the first five entries in the data. - below it shows a list of the thing 
+
 
 ```{r}
 str(Hierochloe_odorata)
 head(Hierochloe_odorata)
 ```
+
 
 As you know from looking at the browser, you can look up a rangemap.
 
@@ -63,9 +69,9 @@ sweetgrass<-BIEN_occurrence_species(species = "Hierochloe_odorata")
 ```
 
 ```{r}
-# Map the range of breadfruit
-map('world', fill=T, col="grey", bg="light blue", xlim=c(-180,20),ylim=c(-60,80))
-plot(sweetgrass_rangemap, col="green", add=T)
+# Map the range of sweetgrass
+map('world', fill=T, col="white", bg="light blue", xlim=c(-180,20),ylim=c(-60,80))
+plot(sweetgrass_rangemap, col="blue", add=T)
 ```
 
 ```{r}

@@ -79,15 +79,17 @@ Add those three lines into the chunk above, then run the chunk.
 Now let's look at some summary statistics:
 
 ```{r}
-# Means
+ Means
 #colMeans(heights)
+#error messages due to above. colmeans takes variable of all in the column heights. It was trying to take avg of male and female, which obvi won't work and family is coded as a string varible, even though it is a name and not a numeric value
 
+#first "real" R code below" it says, drop column 1 and 4 
 colMeans(heights[,c(-1,-4)])
 
 # Standard deviations
 apply(X=heights[,c(-1,-4)], MARGIN=2, FUN=sd)
 
-# Min & Max
+# Min & Max - findinf the midparent and stats 
 apply(X=heights[,c(-1,-4)], MARGIN=2, FUN=min)
 apply(X=heights[,c(-1,-4)], MARGIN=2, FUN=max)
 ```
@@ -123,7 +125,7 @@ head(heights)
 # Population Mean Between Two Independent Samples:
 # http://www.r-tutor.com/elementary-statistics/inference-about-two-populations/population-mean-between-two-independent-samples
 
-# (change "Child" to "Height")
+# (change "Child" to "Height") not best way to do this - need parents' midparent value to not group with offspring - it's paired, etc. T Test
 ttest_result1 = t.test(x=heights$Midparent, y=heights$Height, paired=FALSE, alternative="two.sided")
 ttest_result1
 ```
@@ -148,7 +150,8 @@ ttest_result2
 
 # Interestingly, it looks like parents are slightly taller than the children!
 
-# Is this statistically significant?
+# Is this statistically significant? pvalue = .3735, no, not stat sig
+#if you hit x the output can be erased, can be got back by selecting run again 
 
 # But is it a large effect?  Is it *practically* significant?
 ```
@@ -156,7 +159,8 @@ ttest_result2
 # PLOTTING DATA
 
 ```{r}
-# Let's plot the histograms
+# Let's plot the histograms can load library info and go to packages and search for lattice, which you can install if not there so it will appear. Can also install with the cmd install(thingy)
+
 library(lattice)
 hist(heights$Midparent)
 hist(heights$Height)
@@ -172,7 +176,7 @@ notebook html file if you save your work before exiting.
 Another option shown below is how to make the plots (which will show up in the Plots window, lower right) and then how to save the plot in PDF format when you're happy with it.
 
 ```{r}
-# Let's fix the x-axis to be (5 feet, 7 feet)
+# Let's fix the x-axis to be (5 feet, 7 feet) 
 xlims = c(5*12, 7*12)
 
 hist(heights$Midparent, xlim=xlims)
@@ -191,7 +195,7 @@ hist(heights$Midparent, xlim=xlims, ylim=ylims)
 # Plot the mean
 abline(v=mean(heights$Midparent), lty="dashed", lwd=2, col="blue")
 
-# Plot the 95% confidence interval (2.5% - 97.5%)
+# Plot the 95% confidence interval (2.5% - 97.5%) confidence interval (2x stand dev around mean) 
 CI_025 = mean(heights$Midparent) - 1.96*sd(heights$Midparent)
 CI_975 = mean(heights$Midparent) + 1.96*sd(heights$Midparent)
 abline(v=CI_025, lty="dotted", lwd=2, col="blue")

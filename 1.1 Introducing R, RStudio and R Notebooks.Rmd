@@ -92,6 +92,9 @@ class(x)
 x
 x+1
 class(x)
+(1)
+"1"
+
 ```
 
 Next, try a variable called a "string" or a character, which is distinct from a numeric variable. 
@@ -165,6 +168,10 @@ ylist
 ylist=c("1","2","3","5")
 ylist
 class(ylist)
+
+ylist + 1 - NO! 
+  
+  
 ```
 
 And, you can do math with vectors, *if* the elements of the vectors are all numeric, but not if the elements are characters:
@@ -239,11 +246,15 @@ sd(xlist)^2
 #### Minimum/maximum and range
 min(xlist)
 max(xlist)
+
+
+
 range(xlist)
 max(xlist) - min(xlist)
 
 #### Length of the list
 length(xlist)
+
 
 
 
