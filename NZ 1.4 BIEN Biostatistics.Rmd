@@ -1,0 +1,786 @@
+---
+title: "BIEN Data for mapping and biostatistics"
+output: html_notebook
+---
+
+[BIEN](http://biendata.org)
+
+Today, to build on our previous lesson with BIEN, we will re-visit some of the work we did to be sure proper libraries and some data are loaded. (As you know, no need to re-install.)
+
+```{r}
+install.packages("BIEN")
+library("BIEN")
+library(ape) #Package for working with phylogenies in R
+library(maps) #Useful for making quick maps of occurrences
+library(sp) # A package for spatial data
+#vignette("BIEN")
+```
+
+```{r}
+# Download the data for a focal species.
+Artocarpus_altilis <- BIEN_occurrence_species(species = "Artocarpus altilis")
+```
+
+It looks like nothing happened, but you actually have created a data frame called Artocarpus_altilis, full of character data and numeric data. Use the commands below. The first allows you to view the so called meta-data (data about the data; how many observations, for example). The second command looks at the first six entries in the data frame. The third looks at the last six entries in the data frame.
+
+```{r}
+str(Artocarpus_altilis)
+head(Artocarpus_altilis)
+tail(Artocarpus_altilis)
+```
+
+As you know from looking at the browser, you can look up a rangemap. 
+```{r}
+
+#install.packages("BIEN")
+breadfruit_rangemap <- BIEN_ranges_load_species("Artocarpus altilis")
+breadfruit_rangemap
+BIEN_ranges_load_species("Artocarpus altilis")
+```
+
+
+
+```{r}
+# Map the range of breadfruit
+
+map('world', fill=T, col="dark green", bg = "dark blue", xlim=c(-180,20),ylim=c(-60,80))
+plot(breadfruit_rangemap, col="green", add=T)
+```
+
+```{r}
+# Map the range of breadfruit + occurence records
+map('world', fill=T, col="dark green", bg="dark blue", xlim=c(-180,-20), ylim=c(-60, 80))
+plot(breadfruit_rangemap, col="light green", add=T)
+points(cbind(Artocarpus_altilis$longitude, Artocarpus_altilis$latitude), col="white", pch=20, cex=1)
+```
+
+By default, RBIEN commands for species occurrence only downloads limited information, but those defaults can be changed to get more expansive data, including:
+- species in cultivation are added to those occurring naturally
+- occurrence data outside of the Americas
+- more taxonomy data (authority, higher levels than genus and species)
+- when occurrence happened, country of occurrence, etc.
+
+```{r}
+Artocarpus_altilis_full <- BIEN_occurrence_species(species = "Artocarpus altilis",cultivated = T,only.new.world = F,all.taxonomy = T,native.status = T,observation.type = T,political.boundaries = T)
+
+#CHECK ON THIS - run together
+
+str(Artocarpus_altilis_full)
+```
+
+
+This was a slightly slower process because so much more data were obtained. 
+
+Now let's map again, but on the world map instead of just the Americas. And let's show points from the full query in red, and overlay points from the default query (more limited) in blue. 
+
+```{r}
+map('world', fill=T , col="dark green", bg="dark blue")
+
+#Plot the points from the full query in red
+points(cbind(Artocarpus_altilis_full$longitude, Artocarpus_altilis_full$latitude), col="red", pch=20, cex=1)
+
+# Plot the points from the default query in blue
+points(cbind(Artocarpus_altilis$longitude, Artocarpus_altilis$latitude), col="blue", pch=20, cex=1) 
+```
+
+### Trait Data and linking this to Biostatistics
+
+```{r}
+BIEN_trait_list()
+
+#RUN TO SEE WHAT TYPES OF TRAITS YOU CAN GET! but it wouldn't run in class, so this is weird
+
+```
+
+```{r}
+# Create data frame of breadfruit traits
+
+
+breadfruit_traits <- BIEN_trait_genus(genus = "Artocarpus")
+str(breadfruit_traits)
+breadfruit_traits
+```
+
+```{r}
+Breadfruit_DBH <- BIEN_trait_traitbygenus(trait = "diameter at breast height (1.3 m)", genus = "Artocarpus")
+head(Breadfruit_DBH)
+tail(Breadfruit_DBH)
+str(Breadfruit_DBH)
+```
+
+```{r}
+# List variable names from Breadfruit_DBH data frame
+names(Breadfruit_DBH)
+```
+
+```{r}
+Breadfruit_DBH_small = Breadfruit_DBH[c(1:5)]
+Breadfruit_DBH_small
+Breadfruit_DBH_small = as.data.frame(Breadfruit_DBH_small)
+class(Breadfruit_DBH_small)
+head(Breadfruit_DBH_small)
+class(Breadfruit_DBH_small$trait_value)
+DBH = as.numeric(Breadfruit_DBH_small$trait_value)
+class(DBH)
+```
+
+Note that a library is being loaded below, and without it the boxplots will not be generated. This should be a package installed by default when R is installed or updated, but if it's not then you will need to install it.
+
+```{r}
+library(lattice)
+head(Breadfruit_DBH_small)
+boxplot(DBH~scrubbed_species_binomial, data=Breadfruit_DBH_small)
+```
+  	
+```{r}
+Breadfruit_WPH <- BIEN_trait_traitbygenus(trait = "whole plant height", genus = "Artocarpus")
+str(Breadfruit_WPH)
+Breadfruit_WPH
+```
+
+```{r}
+names(Breadfruit_WPH)
+```
+
+```{r}
+Breadfruit_WPH_small = Breadfruit_WPH[c(1:5)]
+Breadfruit_WPH_small
+Breadfruit_WPH_small = as.data.frame(Breadfruit_WPH_small)
+class(Breadfruit_WPH_small)
+head(Breadfruit_WPH_small)
+class(Breadfruit_WPH_small$trait_value)
+WPH = as.numeric(Breadfruit_WPH_small$trait_value)
+class(WPH)
+```
+
+
+
+```{r}
+mean(DBH, data=Breadfruit_DBH_small)
+mean(WPH, data=Breadfruit_WPH_small)
+```
+
+
+Downloading for just one species: 
+
+```{r}
+Anitidus_DBH <- BIEN_trait_traitbyspecies(trait = "diameter at breast height (1.3 m)", species = "Artocarpus nitidus")
+head(Anitidus_DBH)
+tail(Anitidus_DBH)
+str(Anitidus_DBH)
+```
+
+
+```{r}
+Anitidus_DBH_small = Anitidus_DBH[c(1:5)]
+Anitidus_DBH_small
+Anitidus_DBH_small = as.data.frame(Anitidus_DBH_small)
+class(Anitidus_DBH_small)
+head(Anitidus_DBH_small)
+class(Anitidus_DBH_small$trait_value)
+DBHa = as.numeric(Anitidus_DBH_small$trait_value)
+class(DBHa)
+```
+
+
+```{r}
+boxplot(DBH)
+hist(DBH)
+#can do a too
+```
+
+
+Another species: 
+
+
+```{r}
+Ahirsutus_DBH <- BIEN_trait_traitbyspecies(trait = "diameter at breast height (1.3 m)", species = "Artocarpus hirsutus")
+head(Ahirsutus_DBH)
+tail(Ahirsutus_DBH)
+str(Ahirsutus_DBH)
+```
+
+
+```{r}
+Ahirsutus_DBH_small = Ahirsutus_DBH[c(1:5)]
+Ahirsutus_DBH_small
+Ahirsutus_DBH_small = as.data.frame(Ahirsutus_DBH_small)
+class(Ahirsutus_DBH_small)
+head(Ahirsutus_DBH_small)
+DBHh = as.numeric(Ahirsutus_DBH_small$trait_value)
+class(Ahirsutus_DBH_small$trait_value)
+class(DBHh)
+```
+
+
+
+```{r}
+library(dplyr)
+Artocarpus2<-rbind(Anitidus_DBH_small, Ahirsutus_DBH_small)
+head(Artocarpus2)
+tail(Artocarpus2)
+class(Artocarpus2$trait_value)
+DBHboth = as.numeric(Artocarpus2$trait_value)
+class(DBHboth)
+```
+
+```{r}
+boxplot(DBHboth)
+hist(DBHboth)
+```
+
+```{r}
+ArtocarpusBoth<-cbind(Artocarpus2, DBHboth)
+head(ArtocarpusBoth)
+tail(ArtocarpusBoth)
+```
+
+
+
+```{r}
+boxplot(DBHboth~scrubbed_species_binomial, data=ArtocarpusBoth)
+```
+
+
+Below there is another package being installed into the library and then loaded from the library to be active in the R software. This allows summarizing within species (rather than the whole genus), generating standard functions such as means and standard deviations (sd). The online resource Quick-R can be helpful if you want a bit more support in generating summary statistics, especially within sub-groups. 
+
+https://www.statmethods.net/stats/descriptives.html
+
+```{r}
+install.packages("doBy")
+library(doBy)
+summaryBy(DBH~scrubbed_species_binomial, data=Breadfruit_DBH_small, FUN=c(mean, sd))
+summaryBy(WPH~scrubbed_species_binomial, data=Breadfruit_WPH_small, FUN=c(mean, sd))
+```
+
+```{r}
+(unique(Breadfruit_DBH_small$scrubbed_species_binomial))
+```
+
+```{r}
+(unique(Breadfruit_WPH_small$scrubbed_species_binomial))
+```
+
+
+
+
+
+
+
+
+
+
+##ASSIGNMENT instructions
+
+## Exercises for completing the portfolio 
+Do you think the difference in whole plant height is statistically significant between Artocarpus hirsutus and Artocarpus integer?
+
+Can you combine what was learned in the previous lesson "Introduction to getting, testing and plotting data"? 
+
+Can you choose the most appropriate of the following two tests, re-write and run the code, and create the last portion of this R Notebook to include output, and some interpretive comments about statistical support for or against that hypothesis? 
+
+Also try this for a second species pair, which require obtaining some data from BIEN using R BIEN. 
+
+Some possibilities might be: 
+
+cashews are from Anacardium occidentale and perhaps one of the wild cashews (see Wikipedia)
+
+avocados are from Persea americana but there are other relatives in the genus Persea, notably P. coyo
+
+chocolate and one (or a group) of its relatives within Theobroma
+
+choose two species in the genus Agave (used for fiber, tequila; see Wikipedia)
+
+# Population Mean Between Two Independent Samples
+# http://www.r-tutor.com/elementary-statistics/inference-about-two-populations/population-mean-between-two-independent-samples
+
+# Population Mean Between Two Matched Samples
+# http://www.r-tutor.com/elementary-statistics/inference-about-two-populations/population-mean-between-two-matched-samples
+
+```{r}
+# Population Mean Between Two Independent Samples
+# http://www.r-tutor.com/elementary-statistics/inference-about-two-populations/population-mean-between-two-independent-samples
+ttest_result1 = t.test(x=Breadfruit_WPH_small$scrubbed_species_binomial, y=Breadfruit_WPH_small$trait_value, paired=FALSE, alternative="two.sided")
+ttest_result1
+```
+
+# This will prepare you for Digital Lab 2
+
+Another feature of BIEN is that it can be limited to specified spatial places. 
+
+One built-in feature is to obtain data for different political jurisdictions such as nations, states or provinces within nations, and counties or parishs with states/provinces.
+
+The line in the chunk of code below can be used to obtain  a comprehensive list of all those political jurisdictions which is useful to figure out how to ask for, say "United States" rather than "USA" and so forth. The rest of the code shows how to get county lists.  
+
+
+```{r}
+BIEN_metadata_list_political_names()
+```
+
+
+
+
+```{r}
+Cuba<-BIEN_list_country(country = "Cuba")
+head(Cuba)
+tail(Cuba)
+#Panama<-BIEN_list_country(country = "Panama")
+#head(Panama)
+#tail(Panama)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+#My Assignments - NZ
+
+#NZ Occurance data new state /assignment
+```{r}
+Massachusetts <- BIEN_occurrence_state(country="United States", state="Massachusetts")
+head(Massachusetts)
+tail(Massachusetts)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+##NZ Main Assignment: getting/using/plotting data
+
+
+#NZ nevermind this one, this was from when I was trying to get stuff from an excel sheet 
+```{r}
+getwd()
+list.files()
+```
+
+
+#NZ Getting data continued
+
+
+```{r}
+library(BIEN)
+library(ape) # Package for working with phylogenies in R
+library(maps) # Useful for making quick maps of occurrences
+library(sp) # A package for spatial data
+vignette("BIEN")
+
+```
+
+#NZ aetheonema arabicum try - zero results
+```{r}
+Aethionema_arabicum <- BIEN_trait_species(species = "Aethionema arabicum")
+
+str(Aethionema_arabicum)
+head(Aethionema_arabicum)
+```
+
+#NZ no data for the species, so trying again with Sassafras
+
+```{r}
+Sassafras_traits <- BIEN_trait_genus(genus = "Sassafras")
+str(Sassafras_traits)
+```
+
+
+```{r}
+Sassafras_albidum <- BIEN_trait_species(species = "Sassafras albidum")
+
+head(Sassafras_traits)
+```
+
+
+```{r}
+Sassafras_DBH <- BIEN_trait_traitbygenus(trait = "diameter at breast height (1.3 m)", genus = "Sassafras")
+head(Sassafras_DBH)
+tail(Sassafras_DBH)
+str(Sassafras_DBH)
+names(Sassafras_DBH)
+```
+
+
+
+#Below, I don't understand why head should appear again (should it?) - would love insight!
+
+```{r}
+Sassafras_DBH_small = Sassafras_DBH[c(1:5)]
+Sassafras_DBH_small
+Sassafras_DBH_small = as.data.frame(Sassafras_DBH_small)
+class(Sassafras_DBH_small)
+head(Sassafras_DBH_small)
+class(Sassafras_DBH_small$trait_value)
+DBHa = as.numeric(Sassafras_DBH_small$trait_value)
+class(DBHa)
+```
+
+#NZ for the following...I'm guessing the box plot didn't work because I entered something wrong, but need to spend more time with it and look back to figure it out. I had to fake-reinstall R by renaming mv ~rstudio-desktop because something in my code crashed R over and over, so maybe I missed reinstalling a package or something, or should not be using this code in this place? 
+```{r}
+library(lattice)
+head(Sassafras_DBH_small)
+boxplot(DBH~scrubbed_species_binomial, data=Sassafras_DBH_small)
+
+```
+
+```{r}
+Sassafras_WPH <- BIEN_trait_traitbygenus(trait = "whole plant height", genus = "Sassafras")
+str(Sassafras_WPH)
+Sassafras_WPH
+```
+
+```{r}
+names(Sassafras_WPH)
+
+```
+
+
+```{r}
+Sassafras_WPH_small = Sassafras_WPH[c(1:5)]
+Sassafras_WPH_small
+Sassafras_WPH_small = as.data.frame(Sassafras_WPH_small)
+class(Sassafras_WPH_small)
+head(Sassafras_WPH_small)
+class(Sassafras_WPH_small$trait_value)
+WPH = as.numeric(Sassafras_WPH_small$trait_value)
+class(WPH)
+```
+
+
+```{r}
+mean(DBH, data=Sassafras_DBH_small)
+mean(WPH, data=Sassafras_WPH_small)
+```
+
+
+
+
+```{r}
+library(lattice)
+head(Sassafras_DBH_small)
+boxplot(DBH~scrubbed_species_binomial, data=Sassafras_WPH_small)
+```
+
+
+
+
+#Second species?
+
+#Solidago altiplanities, errors and failures abound: 
+
+```{r}
+Solidago_traits <-BIEN_trait_species("Solidago altiplanities")
+
+
+```
+
+
+```{r}
+Solidago_DBH <- BIEN_trait_traitbyspecies(trait = "diameter at breast height (1.3 m)", species = "Solidago altiplanities")
+head(Solidago_DBH)
+tail(Solidago_DBH)
+str(Solidago_DBH)
+```
+
+```{r}
+Solidago_DBH_small = Solidago_DBH[c(1:5)]
+Solidago_DBH_small
+Solidago_DBH_small = as.data.frame(Solidago_DBH_small)
+class(Solidago_DBH_small)
+head(Solidago_DBH_small)
+class(Solidago_DBH_small$trait_value)
+DBHa = as.numeric(Solidago_DBH_small$trait_value)
+class(DBHa)
+```
+
+
+```{r}
+
+t.test(x=Sassafras_WPH_small$scrubbed_species_binomial, y=Sassafras_WPH_small$trait_value, paired=FALSE, alternative="two.sided")
+
+
+ttest_result1
+
+ttest_result1 = t.test(x=Sassafras_WPH_small$scrubbed_species_binomial, y=Sassafras_WPH_small$trait_value, paired=FALSE, alternative="two.sided")
+ttest_result1
+```
+
+
+#NZ compaing Sassafrass height to diameter
+
+
+
+
+
+```{r}
+library(dplyr)
+Sassafraslife<-rbind(Sassafras_DBH_small, Sassafras_WPH_small)
+head(Sassafraslife)
+tail(Sassafraslife)
+class(Sassafraslife$trait_value)
+Traitsboth = as.numeric(Sassafraslife$trait_value)
+class(Traitsboth)
+```
+
+
+#So I obviously didn't make a very useful plot here... I know I need to establish the height separately from the diameter, but when I tried it I did something wrong, so used rbind as you did in the demo so I'd at least see something. 
+
+```{r}
+boxplot(Traitsboth,
+main = "Sassafras Heights along with Widths for some reason",
+xlab = "why",
+ylab = "why",
+col = "orange",
+border = "green",
+horizontal = TRUE,
+notch = TRUE
+)
+
+```
+
+
+
+#I clearly need to figure out how put a better scale on these and how to do a better job of finding ways to work with the data. 
+
+
+```{r}
+hist(Traitsboth)
+```
+
+
+
+##NZ I don't know why I can't figure out how to put Sassafras_DBH_small and Sassafrass_WPH_small against each other right now. I think if I had more time before turning this in, and now that I'm getting the hang of it a tiny bit, I could figure out what I'm missing. 
+
+```{r}
+head(Sassafras_DBH_small)
+Sassafras_DBH_small
+boxplot(Sassafras_DBH_small)
+hist(Sassafras_DBH_small)
+
+
+
+```
+
+
+
+
+
+##NZ ignore the closed code here, I was trying to figure something else out
+
+```{r}
+#### Column names
+names(diameter at breast height)
+
+#### Dimensions (rows, columns)
+dim(diameter)
+
+#### Class (data.frame, matrix, character, numeric, list, etc.)
+class(diameter)
+
+Means
+#colMeans(heights)
+#error messages due to above. colmeans takes variable of all in the column heights. It was trying to take avg of male and female, which obvi won't work and family is coded as a string varible, even though it is a name and not a numeric value
+
+#first "real" R code below" it says, drop column 1 and 4 
+colMeans(heights[,c(-1,-4)])
+
+# Standard deviations
+apply(X=heights[,c(-1,-4)], MARGIN=2, FUN=sd)
+
+# Min & Max - findinf the midparent and stats 
+apply(X=heights[,c(-1,-4)], MARGIN=2, FUN=min)
+apply(X=heights[,c(-1,-4)], MARGIN=2, FUN=max)
+```
+
+
+####NZ Here is where I tried put place and date collected from .csv file into a table/chart, I didn't finish since I figured we'd do this Friday in class since I wasn't supposed to be going this route.
+
+```{r}
+#wd = "/Users/Natalie/Desktop/portfolio-1-eilatanz"
+#setwd(wd)
+#fn = "Aethionema_arabicum_observations.csv"
+
+#heights = read.csv(Aethionema_arabicum_observations.csv, header = TRUE, sep = "\t")
+#df <- read.table("Aethionema_arabicum_observations.csv", 
+                 header = TRUE)
+
+
+
+#below is from https://www.datacamp.com/community/tutorials/r-tutorial-read-excel-into-r#xlconnect
+#write.xlsx(df, "<Aethionema_arabicum_observations.csv>", 
+#           sheetName="Aethionema_arabicum_observations"
+#           append=TRUE)
+
+#heights = read.table(fn, header=TRUE, sep="\t")
+#df <- read.table("<Aethionema_arabicum_observations>.txt", 
+#                 header = TRUE)
+
+
+#below is from Galton.txt assignment but with new () 
+
+#And, look at "date_collected"
+#heights
+#head(country)
+
+#### Column names
+#names(date_collected)
+
+#### Dimensions (rows, columns)
+#dim(date_collected)
+
+#### Class (data.frame, matrix, character, numeric, list, etc.)
+#class(date_collected)
+#heights
+#fn <- read.table("Aethionema_arabicum_observations.csv", header=TRUE, sep="\t")
+```
+
+
+
+
+
+
+
+
+###Assignment: Mapping with Bien 
+
+
+
+
+
+
+#NZ Aethionema arabicum - why did this not work for the book species? "Error in is.list(Srl) : trying to get slot "polygons" from an object of a basic class ("name") with no slots"
+
+```{r}
+
+# Download the data for a focal species.
+Aethionema_arabicum <- BIEN_occurrence_species(species = "Aethionema arabicum")
+head(Aethionema_arabicum)
+str(Aethionema_arabicum)
+tail(Aethionema_arabicum)
+
+  #not needed: #install.packages("BIEN")
+Aethionema_arabicum_rangemap <- BIEN_ranges_load_species("Aethionema arabicum")
+Aethionema_rangemap
+BIEN_ranges_load_species("Aethionema arabicum")
+
+```
+
+
+
+#NZ Aa map range - shows nothing, but also doesn't show the whole world?
+```{r}
+
+map('world', fill=T, col="black", bg = "light blue", xlim=c(-180,20),ylim=c(-60,80))
+plot(Aethionema_rangemap, col="purple", add=T)
+```
+
+
+#NZ Sassafras map with occurance
+```{r}
+map('world', fill=T, col="dark green", bg="dark blue", xlim=c(-180,-20), ylim=c(-60, 80))
+plot(sassafras_rangemap, col="blue", add=T)
+points(cbind(Sassafras_albidum$longitude, Sassafras_albidum$latitude), col="light green", pch=20, cex=1)
+
+
+```
+
+```{r}
+Sassafras_albidum_full <- BIEN_occurrence_species(species = "Sassafras albidum",cultivated = T,only.new.world = F,all.taxonomy = T,native.status = T,observation.type = T,political.boundaries = T)
+```
+
+```{r}
+map('world', fill=T , col="dark green", bg="dark blue")
+
+```
+
+```{r}
+str(Sassafras_albidum_full)
+```
+
+
+```{r}
+map('world', fill=T , col="white", bg="white")
+points(cbind(Sassafras_albidum_full$longitude, Sassafras_albidum_full$latitude), col="hot pink", pch=20, cex=1)
+
+points(cbind(Sassafras_albidum$longitude, Sassafras_albidum$latitude), col="light green", pch=20, cex=1) 
+```
+
+##NZ The following crashed R for me multiple times, very odd?? Any ideas how or why?
+#"Download the data for a focal species" 
+
+#Sassafras_albidum <- BIEN_occurrence_species(species = "Sassafras albidum")
+#str(Sassafras_albidum)
+#head(Sassafras_albidum)
+#tail(Sassafras_albidum)
+
+#sassafras_rangemap <- BIEN_ranges_load_species("Sassafras_albidum")
+#sassafras_rangemap
+#BIEN_ranges_load_species("Sassafras_albidum")
+ 
+
+#NZ D
+
+```{r}
+# Map the range of Sassafras
+
+map('world', fill=T, col="black", bg = "light blue", xlim=c(-180,20),ylim=c(-60,80))
+plot(sassafras_rangemap, col="purple", add=T)
+```
+
+
+
+###Assignment BELOW: County lists 
+
+
+
+
+
+```{r}
+#bronx <- BIEN_occurrence_county(country="United States", state="New York", county = "Bronx", native.status=TRUE)
+#head(bronx)
+#tail(bronx)
+PlymouthMas_list<-BIEN_list_county(country = "United States", state="Massachusetts", county="Plymouth")
+head(PlymouthMas_list)
+tail(PlymouthMas_list)
+```
+
+```{r}
+BarnstableMas_list<-BIEN_list_county(country = "United States", state="Massachusetts", county="Barnstable")
+head(BarnstableMas_list)
+tail(BarnstableMas_list)
+```
+
+```{r}
+BristolMas_list<-BIEN_list_county(country = "United States", state="Massachusetts", county="Bristol")
+head(BristolMas_list)
+tail(BristolMas_list)
+```
+
+
+
+```{r}
+DukesMas_list<-BIEN_list_county(country = "United States", state="Massachusetts", county="Dukes")
+head(DukesMas_list)
+tail(DukesMas_list)
+```
+##NZ assignment DONE: Bristol, Dukes and Plymouth counties in MA; Mapping; Box Plot with two types of data from Sassafras (though I don't think I executed it that well...)
+
+####To complete this portfolio:
+
+
+Before our next digital lab on Feb 22, choose one of the exercises above and complete it. Also use this last coding exercise to obtain species lists for three counties in a state in the USA outside of New York. For example, you could start with the county where you attended high school. Or, you could use a county where you have vacationed in the past, or where you would like to visit. Also download data for two adjacent counties. 
+
